@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import Point from './components/Point';
 import { Button } from './components/Button';
-import { list } from 'postcss';
+
 const App = () => {
   const [listPoints, setListPoints] = useState([]);
+  const [undid, setUndid] = useState([]);
 
   const handleClick = (event) => {
     const newPoint = {
@@ -15,10 +16,36 @@ const App = () => {
 
   const handleUndo = (event) => {
     event.stopPropagation();
+
+    if (listPoints.length === 0) {
+      return;
+    }
+
+    const lastPoint = listPoints[listPoints.length - 1];
+
+    setUndid((prev) => [...prev, lastPoint]);
+
     setListPoints((prev) => {
       const newList = [...prev].slice(0, -1);
       return newList;
     });
+  };
+
+  const handleRedo = (event) => {
+    event.stopPropagation();
+
+    if (undid.length === 0) {
+      return;
+    }
+
+    const recoveredPoint = undid[undid.length - 1];
+
+    setUndid((prev) => {
+      const newList = [...prev].slice(0, -1);
+      return newList;
+    });
+
+    setListPoints((prev) => [...prev, recoveredPoint]);
   };
 
   return (
@@ -27,7 +54,7 @@ const App = () => {
         <Point key={index} style={{ left: item.positionX, top: item.positionY }} />
       ))}
       <Button onClick={handleUndo}>desfazer</Button>
-      <Button>refazer</Button>
+      <Button onClick={handleRedo}>refazer</Button>
     </section>
   );
 };
